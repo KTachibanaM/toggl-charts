@@ -15,7 +15,7 @@ def main(time_tracking_dir: str):
     csv_files.sort()
 
     weeks = []
-    projects = {}
+    projects = {'Total': [0 for _ in range(len(csv_files))]}
     for w, csv_file in enumerate(csv_files):
         week = csv_file[len(CSV_FILE_PREFIX): -len(CSV_FILE_SUFFIX)].split("_")[0]
         weeks.append(week)
@@ -27,21 +27,23 @@ def main(time_tracking_dir: str):
 
                 project = r[0]
                 time_splits = r[3].split(':')
-                minutes = int(time_splits[0]) * 60 + int(time_splits[1])
+                hours = (int(time_splits[0]) * 60 + int(time_splits[1])) / 60
+
+                projects['Total'][w] += hours
 
                 if project not in projects:
                     projects[project] = [0 for _ in range(len(csv_files))]
-                projects[project][w] += minutes
+                projects[project][w] += hours
 
     legends = []
     plots = []
-    for project, minutes in projects.items():
+    for project, hours in projects.items():
         legends.append(project)
-        plots.append(minutes)
+        plots.append(hours)
 
     plt.figure('Time spend on each "Project" week-by-week')
     plt.xlabel('Week')
-    plt.ylabel('Minutes')
+    plt.ylabel('Hours')
     for plot in plots:
         plt.plot(weeks, plot)
     plt.legend(legends)
